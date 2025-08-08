@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Users, Building, Shield, Bell, Database, Briefcase } from 'lucide-react';
+import { usersService, costCentersService } from '../../services/api';
 
 const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'users' | 'costcenters' | 'roles' | 'security' | 'notifications' | 'system'>('users');
+  const [users, setUsers] = useState<any[]>([]);
+  const [costCenters, setCostCenters] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const tabs = [
     { id: 'users' as const, label: 'Usuários', icon: Users },
@@ -13,62 +18,63 @@ const SettingsPage: React.FC = () => {
     { id: 'system' as const, label: 'Sistema', icon: Database },
   ];
 
-  const users = [
-    {
-      id: '1',
-      name: 'João Silva',
-      email: 'joao@empresa.com',
-      role: 'admin',
-      department: 'TI',
-      status: 'active',
-      lastLogin: '2024-01-15',
-    },
-    {
-      id: '2',
-      name: 'Maria Santos',
-      email: 'maria@empresa.com',
-      role: 'hr',
-      department: 'RH',
-      status: 'active',
-      lastLogin: '2024-01-14',
-    },
-    {
-      id: '3',
-      name: 'Carlos Lima',
-      email: 'carlos@empresa.com',
-      role: 'purchasing',
-      department: 'Compras',
-      status: 'inactive',
-      lastLogin: '2024-01-10',
-    },
-  ];
+  // Carregar dados quando a aba muda
+  useEffect(() => {
+    if (activeTab === 'users') {
+      loadUsers();
+    } else if (activeTab === 'costcenters') {
+      loadCostCenters();
+    }
+  }, [activeTab]);
 
-  const costCenters = [
-    {
-      id: 'CC-001',
-      name: 'Limpeza',
-      description: 'Equipe de limpeza e conservação',
-      budget: 15000,
-      spent: 8750,
-      manager: 'Ana Costa',
-    },
-    {
-      id: 'CC-002',
-      name: 'Manutenção',
-      description: 'Equipe de manutenção predial',
-      budget: 25000,
-      spent: 18200,
-      manager: 'Pedro Oliveira',
-    },
-    {
-      id: 'CC-003',
-      name: 'Jardinagem',
-      description: 'Equipe de jardinagem e paisagismo',
-      budget: 8000,
-      spent: 3400,
-      manager: 'Luiza Ferreira',
-    },
-  ];
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await usersService.getAll();
+      
+      const mappedUsers = response.results.map((user: any) => ({
+        id: user.id.toString(),
+        name: user.name || '',
+        email: user.email || '',
+        role: user.role || 'user',
+        department: user.department || '',
+        status: user.status || 'active',
+        lastLogin: user.last_login || new Date().toISOString().split('T')[0],
+      }));
+      
+      setUsers(mappedUsers);
+    } catch (err) {
+      console.error('Erro ao carregar usuários:', err);
+      setError('Erro ao carregar usuários');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCostCenters = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await costCentersService.getAll();
+      
+      const mappedCostCenters = response.results.map((center: any) => ({
+        id: center.id.toString(),
+        name: center.name || '',
+        description: center.description || '',
+        budget: center.budget || 0,
+        spent: center.spent || 0,
+        manager: center.manager || '',
+      }));
+      
+      setCostCenters(mappedCostCenters);
+    } catch (err) {
+      console.error('Erro ao carregar centros de custo:', err);
+      setError('Erro ao carregar centros de custo');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const roles = [
     {
@@ -125,13 +131,35 @@ const SettingsPage: React.FC = () => {
 
   const renderUsersTab = () => (
     <div className="space-y-6">
+      {loading && (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Carregando usuários...</p>
+        </div>
+      )}
+      
+      {error && (
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={loadUsers}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      )}
+      
+      {!loading && !error && (
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-900">Gestão de Usuários</h3>
         <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
           Adicionar Usuário
         </button>
       </div>
+      )}
       
+      {!loading && !error && (
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -178,18 +206,41 @@ const SettingsPage: React.FC = () => {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 
   const renderCostCentersTab = () => (
     <div className="space-y-6">
+      {loading && (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Carregando centros de custo...</p>
+        </div>
+      )}
+      
+      {error && (
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={loadCostCenters}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      )}
+      
+      {!loading && !error && (
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-900">Centros de Custo</h3>
         <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
           Adicionar Centro de Custo
         </button>
       </div>
+      )}
 
+      {!loading && !error && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {costCenters.map((center) => (
           <div key={center.id} className="bg-white border border-gray-200 rounded-lg p-6">
@@ -239,6 +290,7 @@ const SettingsPage: React.FC = () => {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 

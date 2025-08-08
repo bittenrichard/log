@@ -1,43 +1,46 @@
 import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Star, Phone, Mail, MapPin } from 'lucide-react';
 import { Supplier, SupplierReview } from '../../types';
 import AddSupplierReviewModal from './AddSupplierReviewModal';
+import { suppliersService } from '../../services/api';
 
 const SuppliersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
-  const suppliers: Supplier[] = [
-    {
-      id: '1',
-      name: 'EPI Solutions',
-      contactInfo: 'contato@episolutions.com | (11) 1234-5678',
-      averageRating: 4.5,
-      totalReviews: 12,
-    },
-    {
-      id: '2',
-      name: 'ProSafe',
-      contactInfo: 'vendas@prosafe.com.br | (11) 9876-5432',
-      averageRating: 4.2,
-      totalReviews: 8,
-    },
-    {
-      id: '3',
-      name: 'Uniformes Plus',
-      contactInfo: 'pedidos@uniformesplus.com | (11) 5555-1234',
-      averageRating: 3.8,
-      totalReviews: 15,
-    },
-    {
-      id: '4',
-      name: 'Safety First',
-      contactInfo: 'atendimento@safetyfirst.com.br | (11) 7777-8888',
-      averageRating: 4.7,
-      totalReviews: 20,
-    },
-  ];
+  // Carregar dados do Baserow
+  useEffect(() => {
+    loadSuppliers();
+  }, []);
+
+  const loadSuppliers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await suppliersService.getAll();
+      
+      // Mapear dados do Baserow para o formato esperado
+      const mappedSuppliers: Supplier[] = response.results.map((supplier: any) => ({
+        id: supplier.id.toString(),
+        name: supplier.name || '',
+        contactInfo: supplier.contact_info || '',
+        averageRating: supplier.average_rating || 0,
+        totalReviews: supplier.total_reviews || 0,
+      }));
+      
+      setSuppliers(mappedSuppliers);
+    } catch (err) {
+      console.error('Erro ao carregar fornecedores:', err);
+      setError('Erro ao carregar fornecedores');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredSuppliers = suppliers.filter(supplier =>
     supplier.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -64,8 +67,21 @@ const SuppliersPage: React.FC = () => {
   };
 
   const handleSaveReview = (reviewData: Partial<SupplierReview>) => {
-    console.log('Saving supplier review:', reviewData);
-    // In a real app, this would make an API call
+    handleSaveReviewAsync(reviewData);
+  };
+
+  const handleSaveReviewAsync = async (reviewData: Partial<SupplierReview>) => {
+    try {
+      // Aqui você criaria uma tabela de avaliações no Baserow
+      // Por enquanto, vamos apenas simular a atualização da avaliação média
+      console.log('Saving supplier review:', reviewData);
+      
+      // Recarregar fornecedores após salvar avaliação
+      await loadSuppliers();
+    } catch (err) {
+      console.error('Erro ao salvar avaliação:', err);
+      setError('Erro ao salvar avaliação');
+    }
   };
 
   return (
@@ -98,6 +114,25 @@ const SuppliersPage: React.FC = () => {
 
       {/* Suppliers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading && (
+          <div className="col-span-full text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Carregando fornecedores...</p>
+          </div>
+        )}
+        
+        {error && (
+          <div className="col-span-full text-center py-8">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button 
+              onClick={loadSuppliers}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        )}
+        
         {filteredSuppliers.map((supplier) => (
           <div key={supplier.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
             <div className="flex items-start justify-between mb-4">

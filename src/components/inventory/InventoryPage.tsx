@@ -1,66 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Package, AlertTriangle, Edit, Trash2, XCircle } from 'lucide-react';
 import { ShoppingCart } from 'lucide-react';
 import { InventoryItem } from '../../types';
 import AddItemModal from './AddItemModal';
 import PurchaseOrderModal from './PurchaseOrderModal';
+import { inventoryService } from '../../services/api';
 
 const InventoryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'epi' | 'uniform'>('all');
   const [filterStock, setFilterStock] = useState<'all' | 'low' | 'normal'>('all');
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [purchaseOrderModalOpen, setPurchaseOrderModalOpen] = useState(false);
   const [selectedItemForPurchase, setSelectedItemForPurchase] = useState<InventoryItem | null>(null);
 
-  const inventoryItems: InventoryItem[] = [
-    {
-      id: '1',
-      name: 'Capacete de Segurança Branco',
-      type: 'epi',
-      category: 'Proteção da Cabeça',
-      size: 'M',
-      quantity: 45,
-      minStock: 20,
-      unitCost: 89.90,
-      supplier: 'EPI Solutions',
-      lastUpdated: new Date('2024-01-15'),
-      costCenter: 'CC-001',
-      caNumber: '12345',
-      caExpiryDate: new Date('2024-06-15'),
-    },
-    {
-      id: '2',
-      name: 'Luvas de Látex Descartáveis',
-      type: 'epi',
-      category: 'Proteção das Mãos',
-      size: 'P',
-      quantity: 15,
-      minStock: 50,
-      unitCost: 0.85,
-      supplier: 'ProSafe',
-      lastUpdated: new Date('2024-01-14'),
-      costCenter: 'CC-002',
-      caNumber: '67890',
-      caExpiryDate: new Date('2023-12-01'),
-    },
-    {
-      id: '3',
-      name: 'Uniforme Operacional Azul',
-      type: 'uniform',
-      category: 'Vestimentas',
-      size: 'G',
-      quantity: 28,
-      minStock: 15,
-      unitCost: 125.00,
-      supplier: 'Uniformes Plus',
-      lastUpdated: new Date('2024-01-13'),
-      costCenter: 'CC-001',
-    },
-  ];
+  // Carregar dados do Baserow
+  useEffect(() => {
+    loadInventoryItems();
+  }, []);
 
-  const filteredItems = inventoryItems.filter(item => {
+  const loadInventoryItems = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await inventoryService.getAll();
+      
+      // Mapear dados do Baserow para o formato esperado
+      const mappedItems: InventoryItem[] = response.results.map((item: any) => ({
+        id: item.id.toString(),
+        name: item.name || '',
+        type: item.type || 'epi',
+        category: item.category || '',
+        size: item.size || '',
+        quantity: item.quantity || 0,
+        minStock: item.min_stock || 0,
+        unitCost: item.unit_cost || 0,
+        supplier: item.supplier || '',
+        lastUpdated: item.last_updated ? new Date(item.last_updated) : new Date(),
+        costCenter: item.cost_center || '',
+        caNumber: item.ca_number || undefined,
+        caExpiryDate: item.ca_expiry_date ? new Date(item.ca_expiry_date) : undefined,
+      }));
+      
+      setItems(mappedItems);
+    } catch (err) {
+      console.error('Erro ao carregar itens:', err);
+      setError('Erro ao carregar itens do estoque');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || item.type === filterType;
     const matchesStock = filterStock === 'all' || 
@@ -105,8 +100,45 @@ const InventoryPage: React.FC = () => {
   };
 
   const handleSaveItem = (itemData: Partial<InventoryItem>) => {
-    // In a real app, this would make an API call
-    console.log('Saving item:', itemData);
+    handleSaveItemAsync(itemData);
+  };
+
+  const handleSaveItemAsync = async (itemData: Partial<InventoryItem>) => {
+    try {
+      setLoading(true);
+      
+      // Mapear dados para o formato do Baserow
+      const baserowData = {
+        name: itemData.name,
+        type: itemData.type,
+        category: itemData.category,
+        size: itemData.size,
+        quantity: itemData.quantity,
+        min_stock: itemData.minStock,
+        unit_cost: itemData.unitCost,
+        supplier: itemData.supplier,
+        cost_center: itemData.costCenter,
+        ca_number: itemData.caNumber,
+        ca_expiry_date: itemData.caExpiryDate?.toISOString().split('T')[0],
+        last_updated: new Date().toISOString(),
+      };
+
+      if (editingItem) {
+        // Atualizar item existente
+        await inventoryService.update(editingItem.id, baserowData);
+      } else {
+        // Criar novo item
+        await inventoryService.create(baserowData);
+      }
+      
+      // Recarregar a lista
+      await loadInventoryItems();
+    } catch (err) {
+      console.error('Erro ao salvar item:', err);
+      setError('Erro ao salvar item');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRequestPurchase = (item: InventoryItem) => {
@@ -282,51 +314,78 @@ const InventoryPage: React.FC = () => {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total de Itens</p>
-              <p className="text-2xl font-bold text-gray-900">{inventoryItems.length}</p>
-            </div>
-            <Package className="w-8 h-8 text-blue-600" />
+        {loading && (
+          <div className="col-span-4 text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Carregando itens...</p>
           </div>
-        </div>
+        )}
+        
+        {error && (
+          <div className="col-span-4 text-center py-8">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button 
+              onClick={loadInventoryItems}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        )}
+        
+        {!loading && !error && (
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total de Itens</p>
+                <p className="text-2xl font-bold text-gray-900">{items.length}</p>
+              </div>
+              <Package className="w-8 h-8 text-blue-600" />
+            </div>
+          </div>
+        )}
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Estoque Baixo</p>
-              <p className="text-2xl font-bold text-orange-600">
-                {inventoryItems.filter(item => item.quantity <= item.minStock).length}
-              </p>
+        {!loading && !error && (
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Estoque Baixo</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {items.filter(item => item.quantity <= item.minStock).length}
+                </p>
+              </div>
+              <AlertTriangle className="w-8 h-8 text-orange-600" />
             </div>
-            <AlertTriangle className="w-8 h-8 text-orange-600" />
           </div>
-        </div>
+        )}
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Valor Total</p>
-              <p className="text-2xl font-bold text-green-600">
-                R$ {inventoryItems.reduce((total, item) => total + (item.quantity * item.unitCost), 0).toFixed(2)}
-              </p>
+        {!loading && !error && (
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Valor Total</p>
+                <p className="text-2xl font-bold text-green-600">
+                  R$ {items.reduce((total, item) => total + (item.quantity * item.unitCost), 0).toFixed(2)}
+                </p>
+              </div>
+              <Package className="w-8 h-8 text-green-600" />
             </div>
-            <Package className="w-8 h-8 text-green-600" />
           </div>
-        </div>
+        )}
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Categorias</p>
-              <p className="text-2xl font-bold text-purple-600">
-                {new Set(inventoryItems.map(item => item.category)).size}
-              </p>
+        {!loading && !error && (
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Categorias</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {new Set(items.map(item => item.category)).size}
+                </p>
+              </div>
+              <Filter className="w-8 h-8 text-purple-600" />
             </div>
-            <Filter className="w-8 h-8 text-purple-600" />
           </div>
-        </div>
+        )}
       </div>
 
       {/* Add/Edit Item Modal */}

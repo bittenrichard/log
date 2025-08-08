@@ -1,56 +1,69 @@
 import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, FileText, User, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Request } from '../../types';
 import DeliveryConfirmationModal from './DeliveryConfirmationModal';
+import { requestsService } from '../../services/api';
 
 const RequestsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'fulfilled'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
 
-  const requests: Request[] = [
-    {
-      id: 'REQ-001',
-      requesterId: '1',
-      requesterName: 'Maria Silva',
-      items: [
-        { itemId: '1', itemName: 'Luvas descartáveis', quantity: 100, size: 'P', urgency: 'normal' },
-        { itemId: '2', itemName: 'Avental descartável', quantity: 2, size: 'M', urgency: 'normal' }
-      ],
-      status: 'approved',
-      priority: 'high',
-      costCenter: 'CC-001 - Limpeza',
-      createdAt: new Date('2024-01-15'),
-      notes: 'Solicitação para equipe de limpeza do turno da manhã'
-    },
-    {
-      id: 'REQ-002',
-      requesterId: '2',
-      requesterName: 'João Santos',
-      items: [
-        { itemId: '3', itemName: 'Capacete de segurança', quantity: 1, size: 'M', urgency: 'urgent' },
-        { itemId: '4', itemName: 'Óculos de proteção', quantity: 2, size: 'Único', urgency: 'urgent' }
-      ],
-      status: 'pending',
-      priority: 'high',
-      costCenter: 'CC-002 - Manutenção',
-      createdAt: new Date('2024-01-15'),
-      notes: 'Equipamentos para novo funcionário - início imediato'
-    },
-    {
-      id: 'REQ-003',
-      requesterId: '3',
-      requesterName: 'Ana Costa',
-      items: [
-        { itemId: '5', itemName: 'Botas de segurança', quantity: 1, size: '40', urgency: 'normal' }
-      ],
-      status: 'fulfilled',
-      priority: 'medium',
-      costCenter: 'CC-003 - Jardinagem',
-      createdAt: new Date('2024-01-14')
-    },
-  ];
+  // Carregar dados do Baserow
+  useEffect(() => {
+    loadRequests();
+  }, []);
+
+  const loadRequests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Buscar solicitações
+      const requestsResponse = await requestsService.getAll();
+      
+      // Buscar itens das solicitações
+      const requestItemsResponse = await requestsService.getRequestItems();
+      
+      // Mapear e combinar dados
+      const mappedRequests: Request[] = requestsResponse.results.map((request: any) => {
+        // Filtrar itens desta solicitação
+        const requestItems = requestItemsResponse.results
+          .filter((item: any) => item.request_id === request.id)
+          .map((item: any) => ({
+            itemId: item.item_id?.toString() || '',
+            itemName: item.item_name || '',
+            quantity: item.quantity || 0,
+            size: item.size || '',
+            urgency: item.urgency || 'normal',
+          }));
+
+        return {
+          id: request.id.toString(),
+          requesterId: request.requester_id?.toString() || '',
+          requesterName: request.requester_name || '',
+          items: requestItems,
+          status: request.status || 'pending',
+          priority: request.priority || 'medium',
+          costCenter: request.cost_center || '',
+          createdAt: request.created_at ? new Date(request.created_at) : new Date(),
+          notes: request.notes || undefined,
+        };
+      });
+      
+      setRequests(mappedRequests);
+    } catch (err) {
+      console.error('Erro ao carregar solicitações:', err);
+      setError('Erro ao carregar solicitações');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredRequests = requests.filter(request => {
     const matchesSearch = 
@@ -133,10 +146,20 @@ const RequestsPage: React.FC = () => {
   };
 
   const handleApproveRequest = (request: Request) => {
+    handleUpdateRequestStatus(request.id, 'approved');
     setSelectedRequest(request);
     setDeliveryModalOpen(true);
   };
 
+  const handleUpdateRequestStatus = async (requestId: string, newStatus: string) => {
+    try {
+      await requestsService.update(requestId, { status: newStatus });
+      await loadRequests(); // Recarregar lista
+    } catch (err) {
+      console.error('Erro ao atualizar status:', err);
+      setError('Erro ao atualizar status da solicitação');
+    }
+  };
   const handleConfirmDelivery = (signature: string) => {
     console.log('Delivery confirmed with signature:', signature);
     // In a real app, this would update the request status and save the signature
@@ -200,6 +223,25 @@ const RequestsPage: React.FC = () => {
 
         {/* Requests List */}
         <div className="divide-y divide-gray-200">
+          {loading && (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-500">Carregando solicitações...</p>
+            </div>
+          )}
+          
+          {error && (
+            <div className="text-center py-8">
+              <p className="text-red-600 mb-4">{error}</p>
+              <button 
+                onClick={loadRequests}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Tentar Novamente
+              </button>
+            </div>
+          )}
+          
           {filteredRequests.map((request) => (
             <div key={request.id} className="p-6 hover:bg-gray-50 transition-colors">
               <div className="flex items-start justify-between mb-4">
@@ -270,6 +312,7 @@ const RequestsPage: React.FC = () => {
                   {request.status === 'pending' && (
                     <>
                       <button className="px-3 py-1 text-red-600 border border-red-300 rounded hover:bg-red-50 transition-colors">
+                        onClick={() => handleUpdateRequestStatus(request.id, 'rejected')}
                         Rejeitar
                       </button>
                       <button 
@@ -282,6 +325,7 @@ const RequestsPage: React.FC = () => {
                   )}
                   {request.status === 'approved' && (
                     <button className="px-3 py-1 text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors">
+                      onClick={() => handleUpdateRequestStatus(request.id, 'fulfilled')}
                       Marcar como Atendida
                     </button>
                   )}

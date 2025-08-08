@@ -1,63 +1,50 @@
 import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Package, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { inventoryService } from '../../services/api';
 
 const InventorySummary: React.FC = () => {
-  const categories = [
-    {
-      name: 'Capacetes de Segurança',
-      total: 145,
-      available: 132,
-      reserved: 13,
-      trend: 'up' as const,
-      change: '+5%',
-      color: 'blue',
-    },
-    {
-      name: 'Luvas de Proteção',
-      total: 1250,
-      available: 1180,
-      reserved: 70,
-      trend: 'down' as const,
-      change: '-12%',
-      color: 'green',
-    },
-    {
-      name: 'Óculos de Segurança',
-      total: 89,
-      available: 76,
-      reserved: 13,
-      trend: 'up' as const,
-      change: '+8%',
-      color: 'purple',
-    },
-    {
-      name: 'Uniformes',
-      total: 320,
-      available: 298,
-      reserved: 22,
-      trend: 'stable' as const,
-      change: '0%',
-      color: 'orange',
-    },
-    {
-      name: 'Calçados de Segurança',
-      total: 67,
-      available: 54,
-      reserved: 13,
-      trend: 'up' as const,
-      change: '+15%',
-      color: 'red',
-    },
-    {
-      name: 'Equipamentos Diversos',
-      total: 203,
-      available: 189,
-      reserved: 14,
-      trend: 'down' as const,
-      change: '-3%',
-      color: 'indigo',
-    },
-  ];
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadInventorySummary();
+  }, []);
+
+  const loadInventorySummary = async () => {
+    try {
+      setLoading(true);
+      const response = await inventoryService.getAll();
+      
+      // Agrupar itens por categoria
+      const categoryMap = new Map();
+      
+      response.results.forEach((item: any) => {
+        const category = item.category || 'Outros';
+        if (!categoryMap.has(category)) {
+          categoryMap.set(category, {
+            name: category,
+            total: 0,
+            available: 0,
+            reserved: 0,
+            trend: 'stable' as const,
+            change: '0%',
+            color: ['blue', 'green', 'purple', 'orange', 'red', 'indigo'][categoryMap.size % 6],
+          });
+        }
+        
+        const categoryData = categoryMap.get(category);
+        categoryData.total += item.quantity || 0;
+        categoryData.available += item.quantity || 0;
+      });
+      
+      setCategories(Array.from(categoryMap.values()));
+    } catch (err) {
+      console.error('Erro ao carregar resumo do inventário:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getColorClasses = (color: string) => {
     const colors = {
@@ -90,6 +77,12 @@ const InventorySummary: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {loading ? (
+          <div className="col-span-full text-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-sm text-gray-500">Carregando...</p>
+          </div>
+        ) : (
         {categories.map((category) => (
           <div
             key={category.name}
@@ -129,6 +122,7 @@ const InventorySummary: React.FC = () => {
             </div>
           </div>
         ))}
+        )}
       </div>
     </div>
   );

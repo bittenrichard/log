@@ -1,45 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, GraduationCap, Calendar, FileText, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { Training } from '../../types';
 import AddTrainingModal from './AddTrainingModal';
+import { trainingsService } from '../../services/api';
 
 const TrainingsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'valid' | 'expiring' | 'expired'>('all');
+  const [trainings, setTrainings] = useState<Training[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const trainings: Training[] = [
-    {
-      id: '1',
-      userId: '1',
-      userName: 'Maria Silva',
-      trainingType: 'NR-10 - Segurança em Instalações e Serviços em Eletricidade',
-      issueDate: new Date('2023-06-15'),
-      expiryDate: new Date('2025-06-15'),
-      certificateUrl: '/certificates/nr10-maria.pdf',
-      status: 'valid',
-    },
-    {
-      id: '2',
-      userId: '2',
-      userName: 'João Santos',
-      trainingType: 'NR-35 - Trabalho em Altura',
-      issueDate: new Date('2023-01-20'),
-      expiryDate: new Date('2024-01-20'),
-      certificateUrl: '/certificates/nr35-joao.pdf',
-      status: 'expired',
-    },
-    {
-      id: '3',
-      userId: '3',
-      userName: 'Ana Costa',
-      trainingType: 'NR-06 - Equipamentos de Proteção Individual',
-      issueDate: new Date('2023-11-10'),
-      expiryDate: new Date('2024-05-10'),
-      certificateUrl: '/certificates/nr06-ana.pdf',
-      status: 'expiring',
-    },
-  ];
+  // Carregar dados do Baserow
+  useEffect(() => {
+    loadTrainings();
+  }, []);
+
+  const loadTrainings = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await trainingsService.getAll();
+      
+      // Mapear dados do Baserow para o formato esperado
+      const mappedTrainings: Training[] = response.results.map((training: any) => {
+        const expiryDate = new Date(training.expiry_date);
+        const today = new Date();
+        const diffTime = expiryDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        let status: 'valid' | 'expiring' | 'expired' = 'valid';
+        if (diffDays < 0) {
+          status = 'expired';
+        } else if (diffDays <= 30) {
+          status = 'expiring';
+        }
+
+        return {
+          id: training.id.toString(),
+          userId: training.user_id?.toString() || '',
+          userName: training.user_name || '',
+          trainingType: training.training_type || '',
+          issueDate: new Date(training.issue_date),
+          expiryDate: expiryDate,
+          certificateUrl: training.certificate_url || undefined,
+          status: status,
+        };
+      });
+      
+      setTrainings(mappedTrainings);
+    } catch (err) {
+      console.error('Erro ao carregar treinamentos:', err);
+      setError('Erro ao carregar treinamentos');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredTrainings = trainings.filter(training => {
     const matchesSearch = 
@@ -87,8 +104,31 @@ const TrainingsPage: React.FC = () => {
   };
 
   const handleSaveTraining = (trainingData: Partial<Training>) => {
-    console.log('Saving training:', trainingData);
-    // In a real app, this would make an API call
+    handleSaveTrainingAsync(trainingData);
+  };
+
+  const handleSaveTrainingAsync = async (trainingData: Partial<Training>) => {
+    try {
+      setLoading(true);
+      
+      // Mapear dados para o formato do Baserow
+      const baserowData = {
+        user_id: trainingData.userId,
+        user_name: trainingData.userName,
+        training_type: trainingData.trainingType,
+        issue_date: trainingData.issueDate?.toISOString().split('T')[0],
+        expiry_date: trainingData.expiryDate?.toISOString().split('T')[0],
+        certificate_url: trainingData.certificateUrl,
+      };
+
+      await trainingsService.create(baserowData);
+      await loadTrainings(); // Recarregar lista
+    } catch (err) {
+      console.error('Erro ao salvar treinamento:', err);
+      setError('Erro ao salvar treinamento');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -148,6 +188,26 @@ const TrainingsPage: React.FC = () => {
 
       {/* Trainings Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {loading && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Carregando treinamentos...</p>
+          </div>
+        )}
+        
+        {error && (
+          <div className="text-center py-8">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button 
+              onClick={loadTrainings}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        )}
+        
+        {!loading && !error && (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -213,6 +273,7 @@ const TrainingsPage: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum treinamento encontrado</h3>
             <p className="text-gray-500">Tente ajustar os filtros ou registrar um novo treinamento.</p>
           </div>
+        )}
         )}
       </div>
 

@@ -10,35 +10,35 @@ const Dashboard: React.FC = () => {
   const stats = [
     {
       title: 'Total de Itens',
-      value: '1,247',
       change: '+12%',
       changeType: 'positive' as const,
       icon: Package,
       color: 'blue',
+      dataType: 'inventory' as const,
     },
     {
       title: 'Solicitações Pendentes',
-      value: '23',
       change: '-8%',
       changeType: 'negative' as const,
       icon: FileText,
       color: 'orange',
+      dataType: 'requests' as const,
     },
     {
       title: 'Custo Mensal',
-      value: 'R$ 45.890',
       change: '+5%',
       changeType: 'positive' as const,
       icon: DollarSign,
       color: 'green',
+      dataType: 'cost' as const,
     },
     {
       title: 'Usuários Ativos',
-      value: '89',
       change: '+15%',
       changeType: 'positive' as const,
       icon: Users,
       color: 'purple',
+      dataType: 'users' as const,
     },
   ];
 
