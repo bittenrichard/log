@@ -72,12 +72,12 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
             <Package className="w-6 h-6 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
               {editItem ? 'Editar Item' : 'Adicionar Novo Item'}
             </h2>
           </div>
@@ -89,8 +89,8 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nome do Item *
@@ -101,7 +101,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: Capacete de Segurança Branco"
               />
             </div>
@@ -115,7 +115,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 value={formData.type}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="epi">EPI</option>
                 <option value="uniform">Uniforme</option>
@@ -132,7 +132,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: Proteção da Cabeça"
               />
             </div>
@@ -147,7 +147,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 value={formData.size}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: M, G, Único"
               />
             </div>
@@ -163,7 +163,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 onChange={handleChange}
                 required
                 min="0"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -178,7 +178,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 onChange={handleChange}
                 required
                 min="0"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -193,7 +193,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                   value={formData.caNumber}
                   onChange={handleChange}
                   onBlur={handleCANumberBlur}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ex: 12345"
                 />
                 {isValidatingCA && (
@@ -217,7 +217,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 value={formData.caExpiryDate}
                 onChange={handleChange}
                 disabled={isValidatingCA}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               />
               {formData.caNumber && formData.caExpiryDate && (
                 <p className="text-xs text-green-600 mt-1">CA validado automaticamente</p>
@@ -236,7 +236,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 required
                 min="0"
                 step="0.01"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0.00"
               />
             </div>
@@ -251,7 +251,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 value={formData.supplier}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: EPI Solutions"
               />
             </div>
@@ -266,23 +266,23 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 value={formData.costCenter}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: CC-001"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm sm:text-base text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Save className="w-4 h-4 mr-2" />
               {editItem ? 'Salvar Alterações' : 'Adicionar Item'}
