@@ -96,9 +96,6 @@ const AlertsPanel: React.FC = () => {
       <button className="w-full mt-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
         Ver todos os alertas
       </button>
-    )
-    )
-    }
     </div>
   );
 };
