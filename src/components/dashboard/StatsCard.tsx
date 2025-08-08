@@ -1,4 +1,3 @@
-import React from 'react';
 import React, { useState, useEffect } from 'react';
 import { DivideIcon as LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { inventoryService, requestsService, usersService } from '../../services/api';
