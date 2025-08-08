@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, FileText, User, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Request } from '../../types';
