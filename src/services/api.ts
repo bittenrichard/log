@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // Configuração base do Baserow
 const BASEROW_BASE_URL = 'https://api.baserow.io/api/database/rows/table';
-const BASEROW_TOKEN = 'hsxuExCt9i1XxnhLx3tk5QSIoVG9f9kf';
-const DATABASE_ID = 178;
+const BASEROW_TOKEN = import.meta.env.VITE_BASEROW_TOKEN || 'hsxuExCt9i1XxnhLx3tk5QSIoVG9f9kf';
+const DATABASE_ID = import.meta.env.VITE_BASEROW_DATABASE_ID || 178;
 
 // IDs das tabelas
 export const TABLE_IDS = {
