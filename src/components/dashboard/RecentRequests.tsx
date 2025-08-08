@@ -1,49 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, User, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { requestsService } from '../../services/api';
 
 const RecentRequests: React.FC = () => {
-  const requests = [
-    {
-      id: 'REQ-001',
-      requester: 'Maria Silva',
-      department: 'Limpeza',
-      items: 'Luvas descartáveis (100un), Avental (2un)',
-      status: 'approved' as const,
-      priority: 'high' as const,
-      date: '2024-01-15',
-      costCenter: 'CC-001',
-    },
-    {
-      id: 'REQ-002',
-      requester: 'João Santos',
-      department: 'Manutenção',
-      items: 'Capacete de segurança (1un), Óculos de proteção (2un)',
-      status: 'pending' as const,
-      priority: 'medium' as const,
-      date: '2024-01-15',
-      costCenter: 'CC-002',
-    },
-    {
-      id: 'REQ-003',
-      requester: 'Ana Costa',
-      department: 'Jardinagem',
-      items: 'Botas de segurança (1par)',
-      status: 'fulfilled' as const,
-      priority: 'low' as const,
-      date: '2024-01-14',
-      costCenter: 'CC-003',
-    },
-    {
-      id: 'REQ-004',
-      requester: 'Carlos Lima',
-      department: 'Segurança',
-      items: 'Colete refletivo (3un), Lanterna (2un)',
-      status: 'rejected' as const,
-      priority: 'medium' as const,
-      date: '2024-01-14',
-      costCenter: 'CC-001',
-    },
-  ];
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadRecentRequests();
+  }, []);
+
+  const loadRecentRequests = async () => {
+    try {
+      setLoading(true);
+      const response = await requestsService.getAll();
+      
+      // Pegar apenas as 4 solicitações mais recentes
+      const recentRequests = response.results
+        .slice(0, 4)
+        .map((request: any) => ({
+          id: request.id.toString(),
+          requester: request.requester_name || '',
+          department: request.cost_center || '',
+          items: 'Itens da solicitação', // Simplificado para o dashboard
+          status: request.status || 'pending',
+          priority: request.priority || 'medium',
+          date: request.created_at ? new Date(request.created_at).toISOString().split('T')[0] : '',
+          costCenter: request.cost_center || '',
+        }));
+      
+      setRequests(recentRequests);
+    } catch (err) {
+      console.error('Erro ao carregar solicitações recentes:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -96,6 +88,12 @@ const RecentRequests: React.FC = () => {
       </div>
 
       <div className="overflow-x-auto">
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-sm text-gray-500">Carregando...</p>
+          </div>
+        ) : (
         <table className="w-full">
           <thead>
             <tr className="text-left border-b border-gray-200">
@@ -146,6 +144,7 @@ const RecentRequests: React.FC = () => {
             ))}
           </tbody>
         </table>
+        )}
       </div>
 
       <button className="w-full mt-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">

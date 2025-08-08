@@ -10,57 +10,57 @@ const Dashboard: React.FC = () => {
   const stats = [
     {
       title: 'Total de Itens',
-      value: '1,247',
       change: '+12%',
       changeType: 'positive' as const,
       icon: Package,
       color: 'blue',
+      dataType: 'inventory' as const,
     },
     {
       title: 'Solicitações Pendentes',
-      value: '23',
       change: '-8%',
       changeType: 'negative' as const,
       icon: FileText,
       color: 'orange',
+      dataType: 'requests' as const,
     },
     {
       title: 'Custo Mensal',
-      value: 'R$ 45.890',
       change: '+5%',
       changeType: 'positive' as const,
       icon: DollarSign,
       color: 'green',
+      dataType: 'cost' as const,
     },
     {
       title: 'Usuários Ativos',
-      value: '89',
       change: '+15%',
       changeType: 'positive' as const,
       icon: Users,
       color: 'purple',
+      dataType: 'users' as const,
     },
   ];
 
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">Bem-vindo ao FocoLog</h1>
-        <p className="text-blue-100">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-4 sm:p-6 text-white">
+        <h1 className="text-xl sm:text-2xl font-bold mb-2">Bem-vindo ao FocoLog</h1>
+        <p className="text-blue-100 text-sm sm:text-base">
           Sistema inteligente de gestão de EPIs e uniformes para sua empresa
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat, index) => (
           <StatsCard key={index} {...stat} />
         ))}
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Alerts Panel - Takes 1 column */}
         <div className="lg:col-span-1">
           <AlertsPanel />
