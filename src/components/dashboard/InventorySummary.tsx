@@ -1,4 +1,3 @@
-import React from 'react';
 import React, { useState, useEffect } from 'react';
 import { Package, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { inventoryService } from '../../services/api';
@@ -83,7 +82,7 @@ const InventorySummary: React.FC = () => {
             <p className="text-sm text-gray-500">Carregando...</p>
           </div>
         ) : (
-        {categories.map((category) => (
+        categories.map((category) => (
           <div
             key={category.name}
             className={`p-4 rounded-lg border ${getColorClasses(category.color)} transition-colors hover:shadow-sm`}
@@ -122,7 +121,7 @@ const InventorySummary: React.FC = () => {
             </div>
           </div>
         ))}
-        )}
+        )
       </div>
     </div>
   );

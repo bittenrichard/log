@@ -208,72 +208,74 @@ const TrainingsPage: React.FC = () => {
         )}
         
         {!loading && !error && (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Funcionário</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Treinamento</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Data de Emissão</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Data de Validade</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Status</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Certificado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredTrainings.map((training) => (
-                <tr key={training.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <GraduationCap className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <span className="font-medium text-gray-900">{training.userName}</span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <p className="font-medium text-gray-900">{training.trainingType}</p>
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-900">
-                    {training.issueDate.toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-900">
-                    {training.expiryDate.toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="py-4 px-6">
-                    <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(training.status)}`}>
-                      {getStatusIcon(training.status)}
-                      <span>{getStatusLabel(training.status)}</span>
-                    </span>
-                  </td>
-                  <td className="py-4 px-6">
-                    {training.certificateUrl ? (
-                      <a
-                        href={training.certificateUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-blue-600 hover:text-blue-700"
-                      >
-                        <FileText className="w-4 h-4 mr-1" />
-                        Ver Certificado
-                      </a>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </td>
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Funcionário</th>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Treinamento</th>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Data de Emissão</th>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Data de Validade</th>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Status</th>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-500">Certificado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredTrainings.length === 0 && (
-          <div className="text-center py-12">
-            <GraduationCap className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum treinamento encontrado</h3>
-            <p className="text-gray-500">Tente ajustar os filtros ou registrar um novo treinamento.</p>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredTrainings.map((training) => (
+                  <tr key={training.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <GraduationCap className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <span className="font-medium text-gray-900">{training.userName}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <p className="font-medium text-gray-900">{training.trainingType}</p>
+                    </td>
+                    <td className="py-4 px-6 text-sm text-gray-900">
+                      {training.issueDate.toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="py-4 px-6 text-sm text-gray-900">
+                      {training.expiryDate.toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(training.status)}`}>
+                        {getStatusIcon(training.status)}
+                        <span>{getStatusLabel(training.status)}</span>
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      {training.certificateUrl ? (
+                        <a
+                          href={training.certificateUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-blue-600 hover:text-blue-700"
+                        >
+                          <FileText className="w-4 h-4 mr-1" />
+                          Ver Certificado
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {filteredTrainings.length === 0 && (
+            <div className="text-center py-12">
+              <GraduationCap className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum treinamento encontrado</h3>
+              <p className="text-gray-500">Tente ajustar os filtros ou registrar um novo treinamento.</p>
+            </div>
+          )}
+        </>
         )}
       </div>
 
