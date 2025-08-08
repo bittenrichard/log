@@ -9,7 +9,11 @@ import {
   LogOut,
   Upload,
   Users,
-  Smartphone
+  Smartphone,
+  GraduationCap,
+  ClipboardList,
+  Star,
+  CheckSquare
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -26,8 +30,13 @@ const Sidebar: React.FC = () => {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/estoque', icon: Package, label: 'Estoque' },
     { path: '/estoque/entrada', icon: Upload, label: 'Entrada NF' },
+    { path: '/estoque/contagem', icon: ClipboardList, label: 'Inventário Rotativo' },
     { path: '/solicitacoes', icon: FileText, label: 'Solicitações' },
+    { path: '/treinamentos', icon: GraduationCap, label: 'Treinamentos' },
     { path: '/relatorios', icon: BarChart3, label: 'Relatórios' },
+    { path: '/fornecedores', icon: Star, label: 'Fornecedores' },
+    { path: '/planos-acao', icon: CheckSquare, label: 'Planos de Ação' },
+    { path: '/meus-epis', icon: Users, label: 'Meus EPIs' },
     { path: '/entrega-rapida', icon: Smartphone, label: 'Entrega Rápida' },
     { path: '/configuracoes', icon: Settings, label: 'Configurações' },
   ];

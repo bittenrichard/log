@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Settings, Users, Building, Shield, Bell, Database } from 'lucide-react';
+import { Settings, Users, Building, Shield, Bell, Database, Briefcase } from 'lucide-react';
 
 const SettingsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'users' | 'costcenters' | 'security' | 'notifications' | 'system'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'costcenters' | 'roles' | 'security' | 'notifications' | 'system'>('users');
 
   const tabs = [
     { id: 'users' as const, label: 'Usuários', icon: Users },
     { id: 'costcenters' as const, label: 'Centros de Custo', icon: Building },
+    { id: 'roles' as const, label: 'Funções', icon: Briefcase },
     { id: 'security' as const, label: 'Segurança', icon: Shield },
     { id: 'notifications' as const, label: 'Notificações', icon: Bell },
     { id: 'system' as const, label: 'Sistema', icon: Database },
@@ -66,6 +67,33 @@ const SettingsPage: React.FC = () => {
       budget: 8000,
       spent: 3400,
       manager: 'Luiza Ferreira',
+    },
+  ];
+
+  const roles = [
+    {
+      id: '1',
+      name: 'Soldador',
+      description: 'Profissional especializado em soldagem',
+      usersCount: 12,
+    },
+    {
+      id: '2',
+      name: 'Eletricista',
+      description: 'Profissional especializado em instalações elétricas',
+      usersCount: 8,
+    },
+    {
+      id: '3',
+      name: 'Técnico de Manutenção',
+      description: 'Profissional responsável pela manutenção predial',
+      usersCount: 15,
+    },
+    {
+      id: '4',
+      name: 'Auxiliar de Limpeza',
+      description: 'Profissional responsável pela limpeza e conservação',
+      usersCount: 25,
     },
   ];
 
@@ -214,6 +242,46 @@ const SettingsPage: React.FC = () => {
     </div>
   );
 
+  const renderRolesTab = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold text-gray-900">Gestão de Funções</h3>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Adicionar Função
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {roles.map((role) => (
+          <div key={role.id} className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-lg font-semibold text-gray-900">{role.name}</h4>
+              <Briefcase className="w-6 h-6 text-gray-400" />
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4">{role.description}</p>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Funcionários:</span>
+                <span className="text-sm font-medium text-gray-900">{role.usersCount}</span>
+              </div>
+            </div>
+            
+            <div className="flex space-x-2 mt-4">
+              <button className="flex-1 text-blue-600 hover:text-blue-700 text-sm border border-blue-200 rounded px-3 py-1">
+                Editar
+              </button>
+              <button className="flex-1 text-red-600 hover:text-red-700 text-sm border border-red-200 rounded px-3 py-1">
+                Excluir
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderPlaceholderTab = (title: string, description: string, icon: React.ElementType) => {
     const Icon = icon;
     return (
@@ -231,6 +299,8 @@ const SettingsPage: React.FC = () => {
         return renderUsersTab();
       case 'costcenters':
         return renderCostCentersTab();
+      case 'roles':
+        return renderRolesTab();
       case 'security':
         return renderPlaceholderTab('Configurações de Segurança', 'Configurações de segurança em desenvolvimento...', Shield);
       case 'notifications':

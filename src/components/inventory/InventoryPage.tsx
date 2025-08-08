@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Package, AlertTriangle, Edit, Trash2, XCircle } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { InventoryItem } from '../../types';
 import AddItemModal from './AddItemModal';
+import PurchaseOrderModal from './PurchaseOrderModal';
 
 const InventoryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -9,6 +11,8 @@ const InventoryPage: React.FC = () => {
   const [filterStock, setFilterStock] = useState<'all' | 'low' | 'normal'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [purchaseOrderModalOpen, setPurchaseOrderModalOpen] = useState(false);
+  const [selectedItemForPurchase, setSelectedItemForPurchase] = useState<InventoryItem | null>(null);
 
   const inventoryItems: InventoryItem[] = [
     {
@@ -103,6 +107,16 @@ const InventoryPage: React.FC = () => {
   const handleSaveItem = (itemData: Partial<InventoryItem>) => {
     // In a real app, this would make an API call
     console.log('Saving item:', itemData);
+  };
+
+  const handleRequestPurchase = (item: InventoryItem) => {
+    setSelectedItemForPurchase(item);
+    setPurchaseOrderModalOpen(true);
+  };
+
+  const handleSavePurchaseOrder = (purchaseOrderData: any) => {
+    console.log('Creating purchase order:', purchaseOrderData);
+    // In a real app, this would make an API call
   };
 
   return (
@@ -236,6 +250,15 @@ const InventoryPage: React.FC = () => {
                         >
                           <Edit className="w-4 h-4" />
                         </button>
+                        {item.quantity <= item.minStock && (
+                          <button 
+                            onClick={() => handleRequestPurchase(item)}
+                            className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                            title="Solicitar Compra"
+                          >
+                            <ShoppingCart className="w-4 h-4" />
+                          </button>
+                        )}
                         <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -312,6 +335,14 @@ const InventoryPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveItem}
         editItem={editingItem}
+      />
+
+      {/* Purchase Order Modal */}
+      <PurchaseOrderModal
+        isOpen={purchaseOrderModalOpen}
+        onClose={() => setPurchaseOrderModalOpen(false)}
+        item={selectedItemForPurchase}
+        onSave={handleSavePurchaseOrder}
       />
     </div>
   );

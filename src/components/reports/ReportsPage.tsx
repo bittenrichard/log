@@ -35,6 +35,13 @@ const ReportsPage: React.FC = () => {
       icon: FileSpreadsheet,
       color: 'indigo',
     },
+    {
+      id: 'consumption-by-role' as const,
+      title: 'Consumo por Função',
+      description: 'Análise de consumo de EPIs por função/atividade dos funcionários',
+      icon: BarChart3,
+      color: 'purple',
+    },
   ];
 
   const mockConsumptionData = [
@@ -222,6 +229,14 @@ const ReportsPage: React.FC = () => {
                 Gerar e Baixar CSV
               </button>
             </div>
+          </div>
+        );
+      case 'consumption-by-role':
+        return (
+          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 text-center">
+            <BarChart3 className="w-16 h-16 text-purple-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Consumo por Função</h3>
+            <p className="text-gray-500">Relatório de consumo por função em desenvolvimento...</p>
           </div>
         );
     }

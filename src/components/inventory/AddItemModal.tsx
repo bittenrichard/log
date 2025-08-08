@@ -23,6 +23,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
     caNumber: editItem?.caNumber || '',
     caExpiryDate: editItem?.caExpiryDate ? editItem.caExpiryDate.toISOString().split('T')[0] : '',
   });
+  const [isValidatingCA, setIsValidatingCA] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +43,30 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
         ? parseFloat(value) || 0 
         : value
     }));
+  };
+
+  const handleCANumberBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const caNumber = e.target.value.trim();
+    if (caNumber && caNumber !== editItem?.caNumber) {
+      setIsValidatingCA(true);
+      
+      // Simulate API call to validate CA
+      setTimeout(() => {
+        // Mock CA validation response
+        const mockCAData = {
+          number: caNumber,
+          expiryDate: '2025-12-31',
+          status: 'valid'
+        };
+        
+        setFormData(prev => ({
+          ...prev,
+          caExpiryDate: mockCAData.expiryDate
+        }));
+        
+        setIsValidatingCA(false);
+      }, 1500);
+    }
   };
 
   if (!isOpen) return null;
@@ -161,14 +186,25 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Número do Certificado de Aprovação (CA)
               </label>
-              <input
-                type="text"
-                name="caNumber"
-                value={formData.caNumber}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ex: 12345"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  name="caNumber"
+                  value={formData.caNumber}
+                  onChange={handleChange}
+                  onBlur={handleCANumberBlur}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ex: 12345"
+                />
+                {isValidatingCA && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  </div>
+                )}
+              </div>
+              {isValidatingCA && (
+                <p className="text-xs text-blue-600 mt-1">Validando CA...</p>
+              )}
             </div>
 
             <div>
@@ -180,8 +216,12 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSave, ed
                 name="caExpiryDate"
                 value={formData.caExpiryDate}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isValidatingCA}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               />
+              {formData.caNumber && formData.caExpiryDate && (
+                <p className="text-xs text-green-600 mt-1">CA validado automaticamente</p>
+              )}
             </div>
 
             <div>

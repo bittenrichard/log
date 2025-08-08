@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Package, Clock, ArrowRight } from 'lucide-react';
+import { AlertTriangle, Package, Clock, ArrowRight, Plus } from 'lucide-react';
 
 const AlertsPanel: React.FC = () => {
   const alerts = [
@@ -31,6 +31,11 @@ const AlertsPanel: React.FC = () => {
       time: '6h atrás',
     },
   ];
+
+  const handleCreateAction = (alertId: number) => {
+    console.log('Creating action for alert:', alertId);
+    // In a real app, this would open a modal or navigate to action creation
+  };
 
   const getSeverityColor = (severity: 'critical' | 'warning') => {
     return severity === 'critical' 
@@ -75,7 +80,13 @@ const AlertsPanel: React.FC = () => {
                     </span>
                   </div>
                   <ArrowRight className="w-4 h-4 text-gray-400" />
-                </div>
+                <button
+                  onClick={() => handleCreateAction(alert.id)}
+                  className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                  title="Criar Ação"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>

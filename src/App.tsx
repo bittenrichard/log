@@ -13,6 +13,11 @@ import RequestsPage from './components/requests/RequestsPage';
 import ReportsPage from './components/reports/ReportsPage';
 import SettingsPage from './components/settings/SettingsPage';
 import QuickDeliveryPage from './components/delivery/QuickDeliveryPage';
+import TrainingsPage from './components/trainings/TrainingsPage';
+import InventoryCountPage from './components/inventory/InventoryCountPage';
+import MyEPIsPage from './components/employee/MyEPIsPage';
+import SuppliersPage from './components/suppliers/SuppliersPage';
+import ActionPlansPage from './components/action-plans/ActionPlansPage';
 
 function App() {
   return (
@@ -95,6 +100,56 @@ function App() {
             element={
               <ProtectedRoute>
                 <QuickDeliveryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/treinamentos"
+            element={
+              <ProtectedRoute>
+                <Layout title="Treinamentos e Certificações">
+                  <TrainingsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/estoque/contagem"
+            element={
+              <ProtectedRoute>
+                <Layout title="Inventário Rotativo">
+                  <InventoryCountPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/meus-epis"
+            element={
+              <ProtectedRoute>
+                <Layout title="Meus EPIs">
+                  <MyEPIsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fornecedores"
+            element={
+              <ProtectedRoute>
+                <Layout title="Fornecedores">
+                  <SuppliersPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/planos-acao"
+            element={
+              <ProtectedRoute>
+                <Layout title="Planos de Ação">
+                  <ActionPlansPage />
+                </Layout>
               </ProtectedRoute>
             }
           />

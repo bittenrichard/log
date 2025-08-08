@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, FileText, Save, RotateCcw } from 'lucide-react';
+import { X, FileText, Save, RotateCcw, Download } from 'lucide-react';
 import { Request } from '../../types';
 
 interface DeliveryConfirmationModalProps {
@@ -18,6 +18,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const responsibilityText = `Declaro para os devidos fins que recebi da empresa os equipamentos de proteção individual (EPIs) listados acima, em perfeitas condições de uso. Comprometo-me a utilizá-los adequadamente durante o horário de trabalho e a zelar pela sua conservação.`;
 
@@ -74,9 +75,52 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
     const canvas = canvasRef.current;
     if (!canvas || !hasSignature) return;
 
+    setIsGeneratingPDF(true);
     const signatureData = canvas.toDataURL();
-    onConfirmDelivery(signatureData);
-    onClose();
+    
+    // Simulate PDF generation
+    setTimeout(() => {
+      generateEPIPDF(signatureData);
+      onConfirmDelivery(signatureData);
+      setIsGeneratingPDF(false);
+      onClose();
+    }, 2000);
+  };
+
+  const generateEPIPDF = (signatureData: string) => {
+    // In a real app, this would call the backend API to generate the PDF
+    // For now, we'll simulate the PDF generation
+    console.log('Generating EPI PDF with signature:', signatureData);
+    
+    // Mock PDF content
+    const pdfContent = `
+      FICHA DE ENTREGA DE EPI
+      
+      Empresa: FocoLog Facilities
+      Data: ${new Date().toLocaleDateString('pt-BR')}
+      
+      Funcionário: ${request?.requesterName}
+      Centro de Custo: ${request?.costCenter}
+      
+      Itens Entregues:
+      ${request?.items.map(item => `- ${item.quantity}x ${item.itemName} (Tam: ${item.size})`).join('\n')}
+      
+      Termo de Responsabilidade:
+      ${responsibilityText}
+      
+      Assinatura: [Signature Image]
+    `;
+    
+    // Create a blob and download (simulation)
+    const blob = new Blob([pdfContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ficha-epi-${request?.id}-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   // Initialize canvas
@@ -182,11 +226,20 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
               </button>
               <button
                 onClick={handleConfirmDelivery}
-                disabled={!hasSignature}
+                disabled={!hasSignature || isGeneratingPDF}
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <Save className="w-4 h-4 mr-2" />
-                Confirmar Entrega e Salvar Assinatura
+                {isGeneratingPDF ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Gerando PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Confirmar Entrega e Gerar PDF
+                  </>
+                )}
               </button>
             </div>
           </div>
