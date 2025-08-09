@@ -50,7 +50,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
               </div>
             </div>
           )}
-          </div>
 
           {/* Notifications */}
           <button className="relative p-2 text-gray-400 hover:text-gray-500">
@@ -71,6 +70,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </header>
   );
