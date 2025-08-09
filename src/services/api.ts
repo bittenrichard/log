@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configuração base do Baserow
 const BASEROW_BASE_URL = 'https://api.baserow.io/api/database/rows/table';
-const BASEROW_TOKEN = import.meta.env.VITE_BASEROW_TOKEN || 'hsxuExCt9i1XxnhLx3tk5QSIoVG9f9kf';
+const BASEROW_TOKEN = import.meta.env.VITE_BASEROW_TOKEN;
 const DATABASE_ID = import.meta.env.VITE_BASEROW_DATABASE_ID || 178;
 
 // IDs das tabelas
@@ -18,13 +18,13 @@ export const TABLE_IDS = {
 };
 
 // Configuração do axios
-const baserowApi = axios.create({
+const baserowApi = BASEROW_TOKEN ? axios.create({
   baseURL: BASEROW_BASE_URL,
   headers: {
     'Authorization': `Token ${BASEROW_TOKEN}`,
     'Content-Type': 'application/json',
   },
-});
+}) : null;
 
 // Tipos para respostas da API
 export interface BaserowResponse<T> {
@@ -38,6 +38,74 @@ export interface BaserowResponse<T> {
 export const baserowService = {
   // GET - Buscar dados de uma tabela
   async get<T>(tableId: number, params?: Record<string, any>): Promise<BaserowResponse<T>> {
+    if (!baserowApi) {
+      // Return mock data when API is not available
+      return { count: 0, next: null, previous: null, results: [] };
+    }
+    try {
+      const response = await baserowApi.get(`/${tableId}/?user_field_names=true`, { params });
+      return response.data;
+    } catch (error) {
+      console.warn('Baserow API error, using mock data:', error);
+      return { count: 0, next: null, previous: null, results: [] };
+    }
+  },
+
+  // GET - Buscar um item específico
+  async getById<T>(tableId: number, id: string | number): Promise<T> {
+    if (!baserowApi) {
+      throw new Error('Baserow API not configured');
+    }
+    try {
+      const response = await baserowApi.get(`/${tableId}/${id}/?user_field_names=true`);
+      return response.data;
+    } catch (error) {
+      console.warn('Baserow API error:', error);
+      throw error;
+    }
+  },
+
+  // POST - Criar novo item
+  async create<T>(tableId: number, data: Partial<T>): Promise<T> {
+    if (!baserowApi) {
+      throw new Error('Baserow API not configured');
+    }
+    try {
+      const response = await baserowApi.post(`/${tableId}/?user_field_names=true`, data);
+      return response.data;
+    } catch (error) {
+      console.warn('Baserow API error:', error);
+      throw error;
+    }
+  },
+
+  // PATCH - Atualizar item existente
+  async update<T>(tableId: number, id: string | number, data: Partial<T>): Promise<T> {
+    if (!baserowApi) {
+      throw new Error('Baserow API not configured');
+    }
+    try {
+      const response = await baserowApi.patch(`/${tableId}/${id}/?user_field_names=true`, data);
+      return response.data;
+    } catch (error) {
+      console.warn('Baserow API error:', error);
+      throw error;
+    }
+  },
+
+  // DELETE - Deletar item
+  async delete(tableId: number, id: string | number): Promise<void> {
+    if (!baserowApi) {
+      throw new Error('Baserow API not configured');
+    }
+    try {
+      await baserowApi.delete(`/${tableId}/${id}/`);
+    } catch (error) {
+      console.warn('Baserow API error:', error);
+      throw error;
+    }
+  },
+};
     const response = await baserowApi.get(`/${tableId}/?user_field_names=true`, { params });
     return response.data;
   },
