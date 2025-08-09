@@ -71,7 +71,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           </div>
         </div>
       </div>
-      </div>
     </header>
   );
 };
